@@ -1,0 +1,27 @@
+{% extends "Base.html" %}
+{% block body %}
+    <div class="mt-auto">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">源地址</span>
+            </div>
+            <input type="text" name="source_path" aria-label="source_path" class="form-control" id="source_path">
+            <div class="input-group-prepend">
+                <span class="input-group-text">目标剧集地址</span>
+            </div>
+            <input type="text" name="target_path" aria-label="target_path" class="form-control" id="target_tv_path">
+            <div class="input-group-prepend">
+                <span class="input-group-text">目标电影地址</span>
+            </div>
+            <input type="text" name="target_path" aria-label="target_path" class="form-control" id="target_movie_path">
+            <input type="button" id="sub" value="添加">
+        </div>
+
+    </div>
+    <div id="PathShow">
+
+    </div>
+{% endblock %}
+{% block endbody %}
+    <script type="text/javascript"
+            src="{{ url_for('static',filename='js/function/syn/path.js') }}"></script>{% endblock %}

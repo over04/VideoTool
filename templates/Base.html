@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- CSS -->
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet" crossorigin="anonymous">
+    <!-- jQuery and JavaScript Bundle with Popper -->
+    <script src="{{ url_for('static',filename='js/jquery.js') }}" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+<div class="mb-3">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">首页</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="accordion" id="accordionSyn">
+                <div class="card">
+                    <div class="card-header" id="card-headerSyn">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                                data-target="#collapseSyn" aria-expanded="true" aria-controls="collapseSyn">
+                            同步
+                        </button>
+                    </div>
+                    <div id="collapseSyn" class="collapse" aria-labelledby="card-headerSyn"
+                         data-parent="#accordionSyn">
+                        <div class="card-body">
+                            <h2 class="mb-0">
+                                <a href="{{ url_for('syn.syn_path') }}">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                            data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                                            aria-controls="collapseOne">
+                                        同步目录
+                                    </button>
+                                </a>
+                            </h2>
+                            <h2 class="mb-0">
+                                <a href="{{ url_for('syn.parse') }}">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                            data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                                            aria-controls="collapseOne">
+                                        已解析文件
+                                    </button>
+                                </a>
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="card-header" id="card-headerSyn">
+                        <a href="{{ url_for('service.index') }}">
+                            <button class="btn btn-link btn-block text-left" type="button">
+                                服务
+                            </button>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% block endbody %}{% endblock %}
+</body>
+</html>

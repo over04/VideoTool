@@ -1,0 +1,19 @@
+{% extends "Base.html" %}
+{% block body %}
+    <p>
+        <button class="btn btn-light" id="start_auto_parse" type="button">自动解析同步</button>
+        <button class="btn btn-light" id="auto_parse_state" type="button">查看状态</button>
+    </p>
+    <p>
+        <button class="btn btn-light" id="start_auto_search" type="button">自动搜索元数据</button>
+        <button class="btn btn-light" id="auto_search_state" type="button">查看状态</button>
+    </p>
+    <p>
+        <button class="btn btn-light" id="start_auto_link" type="button">自动链接</button>
+        <button class="btn btn-light" id="auto_link_state" type="button">查看状态</button>
+    </p>
+
+{% endblock %}
+{% block endbody %}
+    <script type="text/javascript"
+            src="{{ url_for('static',filename='js/function/service.js') }}"></script>{% endblock %}
