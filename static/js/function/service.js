@@ -32,7 +32,7 @@ function start_auto_link() {
     )
 }
 function auto_parse_state() {
-    $.post('/api/service/start_auto_parse', {}, function (data) {
+    $.post('/api/service/auto_parse_state', {}, function (data) {
             let results = data['results'];
             if (results === 1) {
                 alert('已经在执行解析同步地址')
