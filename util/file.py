@@ -71,7 +71,7 @@ class Action:
     def mkdir_father(cls, path):
         sp = os.path.split
         first, tail = sp(path)
-        if tail == '':
+        if tail == '' or first == '':
             return
         Action.mkdir_father(first)
         if not Path.exists(first):
@@ -292,4 +292,3 @@ class FileSet:
 
 if __name__ == '__main__':
     pass
-    # Action.mkdir_father('D://北京大学核心能力测评//测试//h/h/h//h/h//h2/he')
