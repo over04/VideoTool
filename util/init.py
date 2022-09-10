@@ -65,6 +65,7 @@ def sql():
     :return:
     """
     database_path: str = Config()['Sqlite']['Path']  # 获取数据库地址
+    Action.mkdir_father(database_path)
     conn = sqlite3.connect(database_path)
     with open('util/sqlite.sql', 'r', encoding='utf-8') as f:
         conn.executescript(f.read())
