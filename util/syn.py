@@ -41,9 +41,9 @@ def auto_search():
     cur.execute('SELECT * FROM Parse WHERE tmdb_id is null')
     fetch = cur.fetchall()
     while len(fetch) != 0:
-        suggest = media.get_suggest_search(media.search(fetch[0]['name'],))
+        suggest = media.get_suggest_search(media.search(fetch[0]['name']))
         if len(suggest[1]) == 0:  # 搜不到东西
-            cur.execute("UPDATE Parse SET tmdb_id = '0' WHERE id = ?", (fetch[0]['id']))
+            cur.execute("UPDATE Parse SET tmdb_id = '0' WHERE id = ?", (fetch[0]['id'],))
         else:
             suggest = suggest[1][0]
             cur.execute("UPDATE Parse SET tmdb_id=?, media_type=? WHERE name=?",
