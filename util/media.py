@@ -4,7 +4,6 @@ from util.metabase.themoviedb import *
 from fuzzywuzzy import fuzz
 
 
-
 class SearchResponse:
     def __init__(self):
         self.__name: str = ''
@@ -15,6 +14,7 @@ class SearchResponse:
         self.__first_air_date: str = ''
         self.__season: list = []
         self.__media_type: str = 'tv'
+
 
 def is_video(name: str):
     if re.search(r'\.([mM][kK][vV]|[mM][pP]4)\b', name):
@@ -41,7 +41,7 @@ def get_name(name: str, count: int = 1) -> str:
             r'([-\[【_\](（]{1}|\s{1,})((([第eE]{0,1}[pP]{0,1})0{0,1}[1-9话]\d话{0,1}([vV]2){0,1}[^\da-zA-Z]{0,}|([eE第]{0,1}[pP]{0,1}0{1,2}\d话{0,1}([vV]2){0,1}|[Ss][Pp]))(\+小剧场){0,1}|(0\d|\d\d)-(0\d|\d\d)|([Mm][Ee][Nn][Uu]|Remix|[Oo][Vv][Aa]|[Cc][Mm]|[Ss][Pp]|[Pp][Vv]|(NC){0,1}([Ee][Dd]|[Oo][Pp]))\d{0,1}\d{0,1})([-\]\[】_\[(（]{1}|\s{1,})',
             ' ', name)  # 去除集数 (-[\]】_\[(（]{1}|\s{1,})
         name = re.sub(
-            r'([-\[【_\](（]{1}|\s{1,})(第[\d一二三四五六七八九]季|OAD|[sS]\d{0,1}\d|\s(IV|III|II|V|VI|I)|\dnd Season|新章|\s.{1,3}篇|剧场)([-\]\[】_\[(（]{1}|\s{1,})',
+            r'([-\[【_\](（]{1}|\s{1,})(第[\d一二三四五六七八九]季|OAD|[sS]\d{0,1}\d|\s(IV|III|II|V|VI|I)|\dnd Season|新章|\s.{1,3}篇|剧场|特典(映像){0,1})([-\]\[】_\[(（]{1}|\s{1,})',
             ' ', name)
         name = re.sub(r'([-\[【_\](（]{1}|\s{1,})MKV|mkv|MP4|mp4', ' ', name)  # 去除文件格式
         name = re.sub(
@@ -73,9 +73,11 @@ def get_season(name: str) -> int or bool:
     __re2 = re.search(r'([-\[【_\](（]{1}|\s{1,})(第[\d一二三四五六七八九]季|[Ss]\d{0,2}\d)([-\]\[】_\[(（]{1}|\s{1,})',
                       name)
     __re3 = re.search(
-        r'([-\[【_\](（]{1}|\s{1,})(Mini|[Mm][Ee][Nn][Uu]|[Ii][Vv]|[Cc][Mm]|[Oo][Vv][Aa]|[Pp][Vv]|[Ss][Pp]|[Tt]railer|[Pp]review|([Nn][Cc]){0,1}([Oo][Pp]|[Ee][Dd]))([-\]\[】_\[(（]{1}|\s{1,})',
+        r'([-\[【_\](（]{1}|\s{1,})(([Tt]railer|[Pp]review|特典(映像){0,1}|Mini|[Ii][Vv]|Drama|PreView|([Nn][Cc]){0,1}([Oo][Pp]|[Ee][Dd])|[Oo][Vv][Aa]|[Mm][Ee][Nn][Uu]|[Cc][Mm]|[Pp][Vv]|[Ss][Pp])0?[1-9]?([vV][23])?)([E-\]\[】_\[(（]{1}|\s{1,})',
         name)
-    if __re1:
+    if __re3:
+        season_number = False
+    elif __re1:
         season_number = -1
     elif __re2:
         temp = re.sub(r'[Vv]2|[^0-9一二三四五六七八九十]', '', __re2.group())
@@ -87,8 +89,6 @@ def get_season(name: str) -> int or bool:
         else:
             dic = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9}
             season_number = dic.get(temp, 1)
-    elif __re3:
-        season_number = False
     else:
         season_number = 1
     return season_number
@@ -102,20 +102,29 @@ def get_episode(name: str) -> tuple or bool:
     '''
     episode_number = (1, 1)
     __re1 = re.search(
-        r'([0-9-\[【_\](（]{1}|\s{1,})(([第eE]{0,1}[pP]{0,1})0{0,1}[1-9话]\d话{0,1}([vV]2){0,1}[^\da-zA-Z]{0,}|([eE第]{0,1}[pP]{0,1}0{1,2}\d话{0,1}([vV]2){0,1}))([-\]\[】_\[(（]{1}|\s{1,}){0,}',
+        r'[-\[【_\](（]([Ee第]?(0?[1-9]|[1-9]\d{1,2})[集话]?([vV][23])?)[-\]\[】_\[(（]',
         name)
-    __re2 = re.search(r'([-\[【_\](（]{1}|\s{1,})第\d\d-\d\d话|[Ee]\d\d-[Ee]{0,1}\d\d([-\]\[】_\[(（]{1}|\s{1,})', name)
-    if __re2:
-        __re2 = re.sub(
+    __re2 = re.search(
+        r'([0-9-\[【_\](（]{1}|\s{1,})(([第eE]{0,1}[pP]{0,1})0{0,1}[1-9话]\d话{0,1}([vV]2){0,1}[^\da-zA-Z]{0,' \
+        r'}|([eE第]{0,1}[pP]{0,1}0{1,2}\d话{0,1}([vV]2){0,1}))([-\]\[】_\[(（]{1}|\s{1,}){0,} ',
+        name)
+    __re3 = re.search(r'([-\[【_\](（]|\s{1,})(第\d\d-\d\d话|[Ee]\d\d-[Ee]?\d\d)([-\]\[】_\[(（]{1}|\s{1,})', name)
+    if __re3:
+        __re3 = re.sub(
             r'[Vv]2|[^0-9一二三四五六七八九十]',
-            '', __re2.group()).strip()
-        __re2 = tuple(map(int, __re2.split()))
-        episode_number = __re2[:2]
+            '', __re3.group()).strip()
+        __re3 = tuple(map(int, __re3.split()))
+        episode_number = __re3[:2]
     elif __re1:
         __re1 = re.sub(
             r'[Vv]2|[^0-9一二三四五六七八九十]',
             '', __re1.group()).strip()  # 多余字符
         episode_number = (int(__re1), int(__re1))
+    elif __re2:
+        __re2 = re.sub(
+            r'[Vv]2|[^0-9一二三四五六七八九十]',
+            '', __re2.group()).strip()  # 多余字符
+        episode_number = (int(__re2), int(__re2))
     return episode_number
 
 
@@ -160,7 +169,9 @@ def get_suggest_search(search_response: Tuple[str, List[Dict[str, str]]]):
 
 
 if __name__ == '__main__':
-    pass
+    name = r'[夜莺家族&YYQ字幕组]New Doraemon 哆啦A梦新番[717][2022.07.30][AVC][1080P][GB_JP].mp4'
+    print(get_episode(name))
+    print(get_season(name))
     # for root, dirs, files in os.walk('/Volumes/download/qb'):
     #    for each_file in files:
     #        if is_video(each_file):

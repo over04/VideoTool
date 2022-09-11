@@ -26,11 +26,12 @@ def auto_parse_from_path(syn_id: str, path: str):  # 自动解析，但是不会
     for each_file in parse_result.listall().file:
         if each_file.is_video:
             season = media.get_season(each_file.file_name)
-            episode = media.get_episode(each_file.file_name)
-            name = media.get_name(each_file.file_name)
-            cur.execute("INSERT OR IGNORE INTO Parse(syn_id, file_path,id,name,season,episode) VALUES(?,?,?,?,?,?)", (
-                syn_id, each_file.path, each_file.hash_path, name, season, episode[0]
-            ))
+            if not season:
+                episode = media.get_episode(each_file.file_name)
+                name = media.get_name(each_file.file_name)
+                cur.execute("INSERT OR IGNORE INTO Parse(syn_id, file_path,id,name,season,episode) VALUES(?,?,?,?,?,?)", (
+                    syn_id, each_file.path, each_file.hash_path, name, season, episode[0]
+                ))
 
 
 def auto_search():
