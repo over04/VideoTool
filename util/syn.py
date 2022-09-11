@@ -29,9 +29,10 @@ def auto_parse_from_path(syn_id: str, path: str):  # 自动解析，但是不会
             if season:
                 episode = media.get_episode(each_file.file_name)
                 name = media.get_name(each_file.file_name)
-                cur.execute("INSERT OR IGNORE INTO Parse(syn_id, file_path,id,name,season,episode) VALUES(?,?,?,?,?,?)", (
-                    syn_id, each_file.path, each_file.hash_path, name, season, episode[0]
-                ))
+                cur.execute("INSERT OR IGNORE INTO Parse(syn_id, file_path,id,name,season,episode) VALUES(?,?,?,?,?,?)",
+                            (
+                                syn_id, each_file.path, each_file.hash_path, name, season, episode[0]
+                            ))
 
 
 def auto_search():
@@ -50,10 +51,11 @@ def auto_search():
             cur.execute("UPDATE Parse SET tmdb_id=?, media_type=? WHERE name=?",
                         (suggest['id'], suggest['media_type'], fetch[0]['name']))  # 默认讲第一个搜索到的作为搜索到的id
             if suggest['media_type'] == 'tv':
-                cur.execute("INSERT INTO TmdbTvTemp(tv_id, name, origin_name, first_air_date) VALUES (?,?,?,?)",
-                            (suggest['id'], suggest['name'], suggest['origin_name'],
-                             time.mktime(time.strptime(suggest['first_air_date'], '%Y-%m-%d')))
-                            )
+                cur.execute(
+                    "INSERT or IGNORE INTO TmdbTvTemp(tv_id, name, origin_name, first_air_date) VALUES (?,?,?,?)",
+                    (suggest['id'], suggest['name'], suggest['origin_name'],
+                     time.mktime(time.strptime(suggest['first_air_date'], '%Y-%m-%d')))
+                    )
         cur.execute('SELECT * FROM Parse WHERE tmdb_id is null')
         fetch = cur.fetchall()
 
@@ -67,7 +69,7 @@ def auto_get_tv_lost_meida():
     config = Config()
     conn = sqlite.connect(config['Sqlite']['Path'])
     cur = conn.cursor()
-    cur.execute('SELECT tmdb_id FROM Parse WHERE tmdb_id not in (SELECT tmdb_id FROM TmdbTvTemp)')
+    cur.execute('SELECT tmdb_id FROM Parse WHERE tmdb_id not in (SELECT tv_id FROM TmdbTvTemp)')
     fetch = cur.fetchall()
     if fetch is None:
         fetch = []
@@ -78,7 +80,7 @@ def auto_get_tv_lost_meida():
     if temp is None:
         temp = []
     fetch.extend(temp)
-    for i in {i['tv_id'] for i in fetch}:
+    for i in {i.get('tv_id', i.get('tmdb_id')) for i in fetch}:
         response = media.search_tv(i)
         if response:  # 有查询结果
             cur.execute(
@@ -145,7 +147,7 @@ def auto_link():
     """
     config = Config()
     conn = sqlite.connect(config['Sqlite']['Path'])
-    tv_config:str = config['Syn']['Tv']
+    tv_config: str = config['Syn']['Tv']
     cur = conn.cursor()
     cur.execute('SELECT syn_id, file_path, media_type, tmdb_id, episode, season  FROM Parse')  # tmdb_id在tv里面对应的是tv_id
     fetch = cur.fetchall()
@@ -170,8 +172,9 @@ def auto_link():
             if episode_info is None:
                 continue
             episode_info = episode_info[0]
-            cur.execute("SELECT * FROM TmdbTvTemp WHERE tv_id = ?",(i['tmdb_id'], ))
+            cur.execute("SELECT * FROM TmdbTvTemp WHERE tv_id = ?", (i['tmdb_id'],))
             tv_info = cur.fetchall()
+            print(tv_info)
             if tv_info is None:
                 continue
             tv_info = tv_info[0]
@@ -192,11 +195,10 @@ def auto_link():
                 'day': full_time.tm_mday
             }
 
-            last_name = tv_config.format(**form) # 自动合成的名字(目录)
+            last_name = tv_config.format(**form)  # 自动合成的名字(目录)
             full_path = f"{target_tv_path.rstrip('/')}/{last_name}.{source_path.file_type}"
             Action.mkdir_father(full_path)
             Action.link(source_path.path, full_path)
-
 
 
 if __name__ == '__main__':

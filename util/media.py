@@ -169,7 +169,7 @@ def get_suggest_search(search_response: Tuple[str, List[Dict[str, str]]]):
 
 
 if __name__ == '__main__':
-    name = r'[夜莺家族&YYQ字幕组]New Doraemon 哆啦A梦新番[717][2022.07.30][AVC][1080P][GB_JP].mp4'
+    name = r'[Kamigami] Summer Time Rendering - 01 [1080p x265 Ma10p AAC]'
     print(get_episode(name))
     print(get_season(name))
     # for root, dirs, files in os.walk('/Volumes/download/qb'):

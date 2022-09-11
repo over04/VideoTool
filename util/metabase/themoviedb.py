@@ -9,6 +9,7 @@ def search_from_string(name: str) -> List[Dict[str, str]] or bool:
     从字符串中搜索
     :return: 返回列表 name id first_air_time media_type original_name失败返回False
     """
+    global search_response
     config = Config()
     api_key: str = config['themoviedb']['API_KEY']  # themoviedb的api
     url = config['themoviedb']['URL']
@@ -16,10 +17,15 @@ def search_from_string(name: str) -> List[Dict[str, str]] or bool:
         return False
     proxies = config['proxies']
     proxies = network.fix_proxies(proxies)
-    search_response = requests.get(f'{url}/search/multi', proxies=proxies,
-                                   params={'api_key': api_key, 'query': name, 'language': 'en-us',
-                                           'page': 1})  # 第一遍获取英文值
     response = []  # 搜索到的返回值
+    for i in range(3):
+        try:
+            search_response = requests.get(f'{url}/search/multi', proxies=proxies,
+                                           params={'api_key': api_key, 'query': name, 'language': 'en-us',
+                                                   'page': 1}, timeout=5)  # 第一遍获取英文值
+            break
+        except:
+            return response
     if search_response.status_code == 200:
         search_response_json = search_response.json()
         if len(search_response_json['results']) == 0:
@@ -52,8 +58,14 @@ def get_tv_detail(tv_id) -> List[Dict[str, str]] or bool:
     proxies = config['proxies']
     proxies = network.fix_proxies(proxies)
     lang = config['themoviedb']['LANG']
-    search_response = requests.get(f'{url}/tv/{tv_id}', proxies=proxies, params={'api_key': api_key, 'language': lang,
-                                                                                 'append_to_response': 'alternative_titles'})
+    for i in range(3):
+        try:
+            search_response = requests.get(f'{url}/tv/{tv_id}', proxies=proxies,
+                                           params={'api_key': api_key, 'language': lang,
+                                                   'append_to_response': 'alternative_titles'}, timeout=5)
+            break
+        except:
+            return False
     if search_response.status_code == 200:
         response_json = search_response.json()
         name = ''
@@ -83,9 +95,15 @@ def get_season_detail(tv_id, season_number):
     proxies = config['proxies']
     proxies = network.fix_proxies(proxies)
     lang = config['themoviedb']['LANG']
-    season_response = requests.get(f'{url}/tv/{tv_id}/season/{season_number}', proxies=proxies,
-                                   params={'api_key': api_key, 'language': lang})
     response = []
+    for i in range(3):
+        try:
+            season_response = requests.get(f'{url}/tv/{tv_id}/season/{season_number}', proxies=proxies,
+                                           params={'api_key': api_key, 'language': lang}, timeout=5)
+            break
+        except:
+            return response
+
     if season_response.status_code == 200:
         response_json = season_response.json()['episodes']
         for i in response_json:
@@ -105,7 +123,8 @@ def get_season_detail(tv_id, season_number):
 
 
 if __name__ == '__main__':
-    print(get_tv_detail('117933'))
-    # print(get_season_detail('117933', 1))
-    # a = search_from_string('夏日重现')
-    # print(a)
+    pass
+    #print(get_tv_detail('117933'))
+# print(get_season_detail('117933', 1))
+# a = search_from_string('夏日重现')
+# print(a)

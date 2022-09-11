@@ -29,7 +29,7 @@ DEFEAT_CONFIG = {
     },
     'Syn': {
         'Tv': '{tv_name} ({year})/Season {season_number}/{tv_name} - S{season_number}E{episode_number} - {'
-              'episode_number}'
+              'episode_name}'
     }
 
 }
