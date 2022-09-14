@@ -4,5 +4,5 @@ bl = Blueprint('jackett', __name__, url_prefix='/jackett')
 
 
 @bl.route('/')
-def syn_path():
+def index():
     return render_template('jackett.html')

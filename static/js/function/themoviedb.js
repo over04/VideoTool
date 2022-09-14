@@ -36,10 +36,9 @@ function add_follow() {
             'media_type':media_type
         },
         function () {
-            alert('添加成功')
+            alert('添加订阅成功')
         }
     )
-    console.log()
 }
 
 function bind() {

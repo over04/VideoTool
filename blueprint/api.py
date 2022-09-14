@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, url_for, redirect, abort
 from util.config import Config
 from util.G import g
-from util import sqlite, syn, media
+from util import sqlite, syn, media, jackett, qb
 from util import follow
 import threading
 
@@ -33,7 +33,6 @@ def _auto_search():
 def _auto_link():
     syn.auto_link()
     g['service']['auto_link'] = False
-
 
 
 @bl.route('/service/auto_parse_state', methods=['POST', 'GET'])
@@ -202,6 +201,19 @@ def themoviedb_search():
     return abort(404)
 
 
+@bl.route('/themoviedb/search_best', methods=['POST', 'GET'])
+def themoviedb_search_best():
+    form = get_form()
+    if form is not False:
+        search_keyword = form.get('search_keyword')
+        data = media.search(search_keyword, 'zh-CN').get_suggest_search().head.dic
+        return {
+            'code': 500,
+            'results': data
+        }
+    return abort(404)
+
+
 @bl.route('/themoviedb/add_follow', methods=['POST', 'GET'])
 def themoviedb_add_follow():
     form = get_form()
@@ -212,5 +224,30 @@ def themoviedb_add_follow():
         return {
             'code': 500,
             'results': 1
+        }
+    return abort(404)
+
+
+@bl.route('/jackett/search', methods=['POST', 'GET'])
+def jackett_search():
+    form = get_form()
+    if form is not False:
+        search_keyword = form.get('search_keyword')
+        return {
+            'code': 500,
+            'results': jackett.search(search_keyword)
+        }
+    return abort(404)
+
+
+@bl.route('/qbittorrent/download', methods=['POST', 'GET'])
+def qbittorrent_download():
+    form = get_form()
+    if form is not False:
+        url = form.get('url')
+        qb.add(url)
+        return {
+            'code': 500,
+            'results': ''
         }
     return abort(404)

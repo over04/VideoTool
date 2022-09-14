@@ -1,11 +1,17 @@
 {% extends "Base.html" %}
 {% block body %}
-    <div class="mt-auto" style="text-align: center;">
-        <label>
-            <input type="text" id="search_keyword" value="">
-        </label>
+    <div class="mt-auto">
+        <div style="text-align: center;">
+            <label>
+                <input type="text" id="search_keyword" name="search_keyword" value="">
+                <button class="btn btn-light" id="sub_search">搜索</button>
+            </label>
+        </div>
+        <div id="ShowVideo">
+
+        </div>
     </div>
 {% endblock %}
 {% block endbody %}
     <script type="text/javascript"
-            src="{{ url_for('static',filename='js/function/syn/path.js') }}"></script>{% endblock %}
+            src="{{ url_for('static',filename='js/function/jackett.js') }}"></script>{% endblock %}
