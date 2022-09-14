@@ -29,10 +29,12 @@ def auto_parse_from_path(syn_id: str, path: str):  # 自动解析，但是不会
             if season:
                 episode = media.get_episode(each_file.file_name)
                 name = media.get_name(each_file.file_name)
+                print(season, episode, name)
                 cur.execute("INSERT OR IGNORE INTO Parse(syn_id, file_path,id,name,season,episode) VALUES(?,?,?,?,?,?)",
                             (
                                 syn_id, each_file.path, each_file.hash_path, name, season, episode[0]
-                            ))
+                            )
+                            )
 
 
 def auto_search():
@@ -42,20 +44,20 @@ def auto_search():
     cur.execute('DELETE FROM Parse WHERE tmdb_id="0"')
     cur.execute('SELECT * FROM Parse WHERE tmdb_id is null')
     fetch = cur.fetchall()
-    while len(fetch) != 0:
-        suggest = media.get_suggest_search(media.search(fetch[0]['name']))
-        if len(suggest[1]) == 0:  # 搜不到东西
+    while fetch is not None:
+        suggest = media.search(fetch[0]['name']).get_suggest_search()
+        if not suggest.success:  # 搜不到东西
             cur.execute("UPDATE Parse SET tmdb_id = '0' WHERE id = ?", (fetch[0]['id'],))
         else:
-            suggest = suggest[1][0]
+            suggest: media.Tv or media.Movie = suggest.head
             cur.execute("UPDATE Parse SET tmdb_id=?, media_type=? WHERE name=?",
-                        (suggest['id'], suggest['media_type'], fetch[0]['name']))  # 默认讲第一个搜索到的作为搜索到的id
-            if suggest['media_type'] == 'tv':
+                        (suggest.id, suggest.media_type, fetch[0]['name']))  # 默认讲第一个搜索到的作为搜索到的id
+            if suggest.is_tv:
                 cur.execute(
                     "INSERT or IGNORE INTO TmdbTvTemp(tv_id, name, origin_name, first_air_date) VALUES (?,?,?,?)",
-                    (suggest['id'], suggest['name'], suggest['origin_name'],
-                     time.mktime(time.strptime(suggest['first_air_date'], '%Y-%m-%d')))
-                    )
+                    (suggest.id, suggest.name, suggest.origin_name,
+                     time.mktime(time.strptime(suggest.first_air_date, '%Y-%m-%d')))
+                )
         cur.execute('SELECT * FROM Parse WHERE tmdb_id is null')
         fetch = cur.fetchall()
 
@@ -67,6 +69,7 @@ def auto_get_tv_lost_meida():
     :return:
     """
     config = Config()
+    language = config['themoviedb']['LANG']
     conn = sqlite.connect(config['Sqlite']['Path'])
     cur = conn.cursor()
     cur.execute('SELECT tmdb_id FROM Parse WHERE tmdb_id not in (SELECT tv_id FROM TmdbTvTemp)')
@@ -74,20 +77,20 @@ def auto_get_tv_lost_meida():
     if fetch is None:
         fetch = []
     cur.execute(
-        'SELECT tv_id FROM TmdbTvTemp WHERE show_name is null or overview is null or first_air_date is null or '
+        'SELECT tv_id FROM TmdbTvTemp WHERE overview is null or first_air_date is null or '
         'number_of_episodes is null')
     temp = cur.fetchall()
     if temp is None:
         temp = []
     fetch.extend(temp)
     for i in {i.get('tv_id', i.get('tmdb_id')) for i in fetch}:
-        response = media.search_tv(i)
+        response = media.search_tv(i, language)
         if response:  # 有查询结果
             cur.execute(
-                'INSERT or REPLACE INTO TmdbTvTemp(tv_id, name, origin_name, show_name, overview, first_air_date, '
-                'number_of_episodes) VALUES(?,?,?,?,?,?,?)',
-                (response['id'], response['name'], response['origin_name'], response['show_name'], response['overview'],
-                 response['first_air_date'], response['number_of_episodes'])
+                'INSERT or REPLACE INTO TmdbTvTemp(tv_id, name, origin_name, overview, first_air_date, '
+                'number_of_episodes) VALUES(?,?,?,?,?,?)',
+                (response.id, response.name, response.origin_name, response.overview,
+                 response.first_air_date, response.number_of_episodes)
             )
 
 
@@ -97,6 +100,7 @@ def auto_get_meta():
     :return:
     """
     config = Config()
+    language = config['themoviedb']['LANG']
     conn = sqlite.connect(config['Sqlite']['Path'])
     cur = conn.cursor()
     cur.execute('SELECT tv_id FROM TmdbTvTemp')  # 获取所有的tv_id,下面是自动获取所有获取tv_id的元数据
@@ -105,17 +109,17 @@ def auto_get_meta():
         fetch = []
     for i in fetch:
         tv_id = i['tv_id']
-        response = media.get_tv_detail(tv_id)
-        if response:  # 能获取到返回值
-            for _ in response['season']:
-                temp = media.get_season_detail(tv_id=i['tv_id'], season_number=_['season_number'])
-                if temp:
+        response = media.search_tv(tv_id, language)
+        if response.success:  # 能获取到返回值
+            for _ in response.season:
+                temp = media.search_season(tv_id=i['tv_id'], season_number=_['season_number'], language=language)
+                if len(temp) != 0:
                     for each_episode in temp:
                         cur.execute(
                             'INSERT OR REPLACE INTO TmdbEpisodeTemp(tv_id, id, name, overview, season, episode, '
                             'air_date) VALUES (?,?,?,?,?,?,?)',
-                            (tv_id, each_episode['id'], each_episode['name'], each_episode['overview'],
-                             each_episode['season_number'], each_episode['episode_number'], each_episode['air_date'])
+                            (tv_id, each_episode.id, each_episode.name, each_episode.overview,
+                             each_episode.season_number, each_episode.episode_number, each_episode.first_air_date)
                         )
 
 

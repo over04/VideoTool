@@ -1,11 +1,21 @@
 from flask import Blueprint, render_template, request, url_for, redirect, abort
 from util.config import Config
 from util.G import g
-from util import sqlite
-from util import syn
+from util import sqlite, syn, media
+from util import follow
 import threading
 
 bl = Blueprint('api', __name__, url_prefix='/api')
+
+
+def get_form():
+    if request.method == 'POST':
+        form = request.form
+    elif request.method == 'GET':
+        form = request.args
+    else:
+        form = False
+    return form
 
 
 def _auto_parse():
@@ -23,6 +33,7 @@ def _auto_search():
 def _auto_link():
     syn.auto_link()
     g['service']['auto_link'] = False
+
 
 
 @bl.route('/service/auto_parse_state', methods=['POST', 'GET'])
@@ -175,5 +186,31 @@ def syn_add_path():
         return {
             'code': 500,
             'results': []
+        }
+    return abort(404)
+
+
+@bl.route('/themoviedb/search', methods=['POST', 'GET'])
+def themoviedb_search():
+    form = get_form()
+    if form is not False:
+        search_keyword = form.get('search_keyword')
+        return {
+            'code': 500,
+            'results': media.search(search_keyword, 'zh-CN').dic
+        }
+    return abort(404)
+
+
+@bl.route('/themoviedb/add_follow', methods=['POST', 'GET'])
+def themoviedb_add_follow():
+    form = get_form()
+    if form is not False:
+        tmdb_id = form.get('tmdb_id')
+        media_type = form.get('media_type')
+        threading.Thread(target=follow.add_follow, args=(tmdb_id, media_type)).start()
+        return {
+            'code': 500,
+            'results': 1
         }
     return abort(404)

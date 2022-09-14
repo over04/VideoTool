@@ -24,12 +24,12 @@ CREATE TABLE if not exists Parse
 CREATE TABLE if not exists TmdbTvTemp
 (
     tv_id TEXT UNIQUE NOT NULL ,
-    name TEXT , --英文名
+    name TEXT ,
     origin_name TEXT ,
-    show_name TEXT , --最后获取的名称
     overview TEXT ,
     first_air_date INTEGER ,
-    number_of_episodes INTEGER
+    number_of_episodes INTEGER ,
+    follow INT
 );
 CREATE TABLE if not exists TmdbEpisodeTemp
 (

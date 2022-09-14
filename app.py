@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.register_blueprint(syn_bl)
 app.register_blueprint(api_bl)
 app.register_blueprint(service_bl)
+app.register_blueprint(themoviedb_bl)
+app.register_blueprint(jackett_bl)
 
 
 @app.route('/test')

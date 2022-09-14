@@ -59,6 +59,8 @@ class Cursor:
             else:
                 cursor.execute(sql, parameters)
             self.__fetch = cursor.fetchall()
+            if isinstance(self.__fetch, list) and len(self.__fetch) == 0:
+                self.__fetch = None
             conn.commit()
 
     def executescript(self, sql_script):
@@ -80,3 +82,6 @@ if __name__ == '__main__':
     a = connect(a['Sqlite']['Path'])
     with open('./util/sqlite.sql', 'r', encoding='utf-8') as f:
         a.executescript(f.read())
+    cur = a.cursor()
+    # cur.execute('SELECT * FROM Parse ')
+    # print(cur.fetchall())

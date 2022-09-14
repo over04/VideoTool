@@ -1,0 +1,11 @@
+{% extends "Base.html" %}
+{% block body %}
+    <div class="mt-auto" style="text-align: center;">
+        <label>
+            <input type="text" id="search_keyword" value="">
+        </label>
+    </div>
+{% endblock %}
+{% block endbody %}
+    <script type="text/javascript"
+            src="{{ url_for('static',filename='js/function/syn/path.js') }}"></script>{% endblock %}

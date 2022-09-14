@@ -15,7 +15,7 @@ function get_parse_file() {
                         "  </div>\n" +
                         "</div>")
                     //$a.addClass('mt-auto')
-                    $('.card:last-child').data('id', this['id']).addClass('mt-auto')
+                    //$('.card :last-child').data('id', this['id']).addClass('mt-auto')
                 }
             );
         }
